@@ -1,0 +1,56 @@
+package main
+
+import (
+	"flag"
+	"fmt"
+	"strconv"
+	"time"
+)
+
+var (
+	y = flag.Int(`y`, 2017, `-y 2017`)
+	m = flag.Int(`m`, 0, `-m 8`)
+)
+
+/**
+ * 输出一个月的笔记框架
+ * 用于可编辑html的笔记，印象笔记无用
+ */
+func main() {
+	flag.Parse()
+	year := *y
+	month := time.Month(*m)
+	if month == 0 {
+		n := time.Now()
+		month = n.Month()
+	}
+	EchoDiaryDate(year, month)
+}
+
+func EchoDiaryDate(year int, month time.Month) {
+	var week = map[time.Weekday]string{
+		0: `周日`,
+		1: `周一`,
+		2: `周二`,
+		3: `周三`,
+		4: `周四`,
+		5: `周五`,
+		6: `周六`,
+	}
+	loc, _ := time.LoadLocation(`Local`)
+	date := time.Date(year, month+1, 1, 0, 0, 0, 0, loc)
+	date = date.Add(-24 * time.Hour)
+	echo_str := `<div>`
+	for month == date.Month() {
+		echo_str += `<b>` + strconv.Itoa(date.Day()) + week[date.Weekday()] + date.Weekday().String() + `</b><br/>`
+		if date.Day() == 5 {
+		} else if date.Day() == 10 {
+			echo_str += `还招商信用卡<br/>`
+
+		}
+		echo_str += `<br/>`
+		date = date.Add(-24 * time.Hour)
+
+	}
+	fmt.Println(echo_str)
+}
