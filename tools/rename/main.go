@@ -19,7 +19,7 @@ func main() {
 		println(`need dir: -d d:\path\to`)
 		println(`-m cherry_mov/cherry_pic/bl`)
 	}
-	tools.PatchRename(*dir, *mode)
+	PatchRename(*dir, *mode)
 }
 
 func PatchRename(dir string, mode string) {

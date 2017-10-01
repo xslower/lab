@@ -1,10 +1,10 @@
-package tools
+package main
 
 import (
 	"fmt"
 	`os`
 	`path/filepath`
-	// `strings`
+	`github.com/xslower/goutils/utils`
 )
 
 func CompareDir(dirA, dirB string, sync bool, override bool) {
@@ -104,7 +104,7 @@ func showFileInfo(path, dirA, dirB string, fiA, fiB os.FileInfo) {
 func copyFile(src, dst string) {
 	os.MkdirAll(filepath.Dir(dst), 0755)
 	// os.Rename(src, dst)
-	CopyFile(src, dst)
+	utils.CopyFile(src, dst)
 	fi, err := os.Stat(src)
 	throw(err)
 	err = os.Chtimes(dst, fi.ModTime(), fi.ModTime())

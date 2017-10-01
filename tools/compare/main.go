@@ -1,11 +1,10 @@
 package main
 
 import (
-	`biz/tools/tools`
 	`flag`
 	"fmt"
 	`github.com/astaxie/beego/config`
-	`greentea/utils`
+	`github.com/xslower/goutils/utils`
 	`os`
 	`path/filepath`
 	`strings`
@@ -138,7 +137,7 @@ func showFileInfo(path, dirA, dirB string, fiA, fiB os.FileInfo) {
 func copyFile(src, dst string) {
 	os.MkdirAll(filepath.Dir(dst), 0755)
 	// os.Rename(src, dst)
-	tools.CopyFile(src, dst)
+	CopyFile(src, dst)
 	fi, err := os.Stat(src)
 	throw(err)
 	err = os.Chtimes(dst, fi.ModTime(), fi.ModTime())

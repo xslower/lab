@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"github.com/json-iterator/go"
+	"github.com/resure-tech/lib/encoding/json"
+	"github.com/vmihailenco/msgpack"
 )
 
 var str = []byte(`{
@@ -22,19 +24,23 @@ var str = []byte(`{
 }`)
 
 type Info struct {
-	Host string
+	Host string `json:"host"`
 	User string
 	Pass string
 }
 
 func main() {
-	info := map[string]*Info{}
-	err := jsoniter.Unmarshal(str, &info)
-	for _, in := range info {
-		echo(in)
-	}
-	echo(err)
+	in := Info{`abcd`, `aaa`, `bbb`}
+	b, _ := msgpack.Marshal(in)
+	on := Info{}
+	_ = msgpack.Unmarshal(b, &on)
+	echo(b, string(b), on)
 }
 func echo(i ...interface{}) {
 	fmt.Println(i...)
+}
+func placeHolder() {
+	_ = json.Decoder{}
+	_ = jsoniter.Nil
+	var _ msgpack.Marshaler
 }

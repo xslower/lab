@@ -1,3 +1,6 @@
+/**
+ * 线程不安全的，强行无锁实现，用来测试性能
+ */
 package main
 
 import (
@@ -11,7 +14,7 @@ import (
 /**
  * pi与ci之间空一个位置，用以标示空或满，这样不用额外的容量竞争变量
  */
-type Queue struct {
+type MtxQueue struct {
 	mod int64 //这里mod只能=2^n，取余即可使用“&”操作
 	pi  int64
 	ci  int64
@@ -21,15 +24,15 @@ type Queue struct {
 	mtx sync.RWMutex
 }
 
-func NewQueue() (r *Queue) {
+func NewQueue() (r *MtxQueue) {
 	var ln int64 = 16
-	return &Queue{
+	return &MtxQueue{
 		dt:  make([]string, ln),
 		bit: make([]bool, ln),
 		mod: ln - 1}
 }
 
-func (this *Queue) Set(v string) (ret bool) {
+func (this *MtxQueue) Set(v string) (ret bool) {
 	// defer this.mtx.Unlock()
 	// this.mtx.Lock()
 	var pi = this.pi
@@ -46,7 +49,7 @@ func (this *Queue) Set(v string) (ret bool) {
 
 }
 
-func (this *Queue) Get() (v string) {
+func (this *MtxQueue) Get() (v string) {
 	// defer this.mtx.RUnlock()
 	// this.mtx.RLock()
 	var pi, ci, mod int64
@@ -79,7 +82,7 @@ var (
 	chc = make(chan bool, cnt)
 )
 
-func producer(q *Queue) {
+func producer(q *MtxQueue) {
 	for i := 0; i < cnt; i++ {
 		go func(i int) {
 			for j := 0; j < 10000; j++ {
@@ -93,7 +96,7 @@ func producer(q *Queue) {
 		}(i)
 	}
 }
-func concumer(q *Queue) {
+func concumer(q *MtxQueue) {
 	for i := 0; i < cnt; i++ {
 		go func() {
 			for j := 0; j < 10000; j++ {

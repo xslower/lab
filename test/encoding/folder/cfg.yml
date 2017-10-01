@@ -1,0 +1,7 @@
+port: 80
+log_path: log/error.log
+log_level: 1
+cache_drv: godis
+# cache_args: 
+#   godis: 127.0.0.1:7070
+01: abcdef

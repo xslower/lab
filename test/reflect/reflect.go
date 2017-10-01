@@ -1,6 +1,9 @@
 package main
 
 import (
+	"bytes"
+	"encoding/binary"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -10,16 +13,98 @@ import (
 	"strings"
 	"time"
 	"unsafe"
+
+	"encoding/json"
+	"github.com/json-iterator/go"
+	// mjson "github.com/resure-tech/lib/encoding/json"
 )
 
 type Aa struct {
-	A int    `col:"aaa" auto:"1"`
-	B string `col:"bbb"`
+	A int    `json:"aaa" auto:"1"`
+	B string `json:"bbb"`
+	C int16  `json:"c"`
+	D []byte `json:"d"`
+	E uint8
+	f uint8
+}
+type Bb struct {
+	Aa
+}
+
+func (a *Aa) Whaha() {
+	echo(`aa`)
+}
+
+type ff func()
+
+func prof() {
+	cnt := 5000
+	tt := &Aa{A: 8, B: `pwofnsodpfijw`, C: 9977, D: []byte{'a', 'b', 'c', 'z'}, E: 244}
+	a := []*Aa{tt, tt, tt}
+	start := time.Now()
+	// b := &Aa{}
+	var stm []byte
+	for i := 0; i < cnt; i++ {
+		// stm, _ = mjson.Marshal(a)
+		// _ = ByteToStt(b, stm)
+
+	}
+	end := time.Now()
+	echo(string(stm))
+	echo(end.Sub(start))
+	start2 := time.Now()
+	for i := 0; i < cnt; i++ {
+		stm, _ = json.Marshal(a)
+		// json.Unmarshal(stm, b)
+	}
+	end2 := time.Now()
+	echo(string(stm))
+	echo(end2.Sub(start2))
+
+	start3 := time.Now()
+	for i := 0; i < cnt; i++ {
+		stm, _ = jsoniter.Marshal(a)
+		// jsoniter.Unmarshal(stm, b)
+	}
+	end3 := time.Now()
+	echo(end3.Sub(start3))
+	// a := &Aa{}
+	// start := time.Now()
+	// cnt := 1000000
+	// for i := 0; i < cnt; i++ {
+	// 	r := reflect.ValueOf(a).Elem().Field(0)
+	// 	if r.Kind() == reflect.Int {
+	// 		r.SetInt(999)
+	// 	}
+
+	// }
+	// end := time.Now()
+	// echo(end.Sub(start))
+
+	// echo(a)
+	// start2 := time.Now()
+	// for i := 0; i < cnt; i++ {
+	// 	t := reflect.TypeOf(a).Elem().Field(0)
+	// 	if t.Type.Kind() == reflect.Int {
+	// 		ptr := uintptr(unsafe.Pointer(a)) + t.Offset
+	// 		*((*int)(unsafe.Pointer(ptr))) = 888
+	// 	}
+	// }
+	// end2 := time.Now()
+	// echo(end2.Sub(start2))
+	// echo(a)
+}
+
+func main() {
+	a := `aa`
+	ref := reflect.ValueOf(a)
+	echo(ref.String())
 }
 
 func assign() {
-	a := Aa{}
-	vo := reflect.ValueOf(&a).Elem()
+	//struct
+	a := &Aa{}
+	vo := reflect.ValueOf(a).Elem()
 	to := vo.Type()
 	for i := 0; i < to.NumField(); i++ {
 		ft := to.Field(i)
@@ -31,6 +116,12 @@ func assign() {
 		}
 		echo(fv.Type(), fv.Interface())
 	}
+	//direct assign to interface
+	var p *Aa = &Aa{}
+	a = &Aa{A: 123}
+	ref := reflect.ValueOf(p).Elem()
+	ref.Set(reflect.ValueOf(a))
+	echo(p)
 }
 
 func usafe() {
@@ -116,12 +207,44 @@ func testIfcCopy() {
 	e.SetInt(77)
 	echo(i, v, e)
 }
-func main() {
-	ref := reflect.ValueOf(&Aa{}).Elem()
-	fld := ref.FieldByName(`B`)
-	echo(fld.IsValid())
+func getFieldValue(fld reflect.Value) (val []byte) {
+	buf := bytes.NewBuffer([]byte{})
+	binary.Write(buf, binary.BigEndian, fld.Interface())
+	val = buf.Bytes()
+	return
 }
 
+func setFieldValue(fldPrr reflect.Value, val []byte) {
+	fld := fldPrr.Elem()
+	buf := bytes.NewBuffer(val)
+	binary.Read(buf, binary.BigEndian, fld.Addr().Interface())
+	return
+}
+func testConvert() {
+
+	var a int64 = 199
+	ref := reflect.ValueOf(a)
+	by := getFieldValue(ref)
+	by = append(by, by...)
+	echo(by)
+	var b int64
+	br := reflect.ValueOf(&b)
+	setFieldValue(br, by)
+	echo(b)
+
+}
+
+type Slice struct {
+	arr uintptr
+	ln  int
+	cp  int
+}
+
+func reverseBytes(b []byte) {
+	for i := 0; i < len(b)/2; i++ {
+		b[i], b[len(b)-i-1] = b[len(b)-i-1], b[i]
+	}
+}
 func final() {
 	if exception := recover(); exception != nil {
 		log.Println(exception)
@@ -153,4 +276,5 @@ func placeHolder() {
 	_ = os.O_WRONLY
 	_ = filepath.Ext(``)
 	_ = reflect.Array
+	_ = errors.New(``)
 }

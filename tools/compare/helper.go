@@ -1,4 +1,4 @@
-package tools
+package main
 
 import (
 	"greentea/utils"

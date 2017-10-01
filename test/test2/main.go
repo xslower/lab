@@ -2,12 +2,9 @@ package main
 
 import (
 	//	`encoding/json`
+
 	"fmt"
-	"strconv"
-	//	`strings`
-	// "reflect"
-	"net/http"
-	"time"
+	// "github.com/resure-tech/lib/encoding/json"
 )
 
 var ()
@@ -22,12 +19,24 @@ type HaHaHa struct {
 func (this HaHaHa) Hello(s string) {
 	echo(`hello`, s)
 }
+func strSlc2Map(slc []string) (m map[string]bool) {
+	for i := 0; i < len(slc); i++ {
+		m[slc[i]] = true
+	}
+	return
+}
+
+func setMap(m *map[string]bool) {
+	(*m)[`aa`] = true
+}
 
 func main() {
-	a := []int{1, 2, 3, 4, 5, 6}
-	b := a[1:3:5]
-	echo(b)
-	echo(cap(b))
+	// str := []string{`a`, `b`, `c`, `d`}
+	// m := strSlc2Map(str)
+	var a float64
+	if a == 0.0 {
+		echo(true)
+	}
 }
 func check(err error) bool {
 	if err != nil {
