@@ -9,21 +9,20 @@ import (
 )
 
 var (
-	dir  *string = flag.String(`d`, ``, `-d c:\path\to`)
-	mode *string = flag.String(`m`, `bl`, `-m cherry_mov/cherry_pic/bl`)
+	dir  *string = flag.String(`d`, `E:\Pictures\mov`, `-d c:\path\to`)
+	mode *string = flag.String(`m`, `bl`, `-m mov/add-dir/mo/pic`)
 )
 
 func main() {
 	flag.Parse()
 	if *dir == `` {
 		println(`need dir: -d d:\path\to`)
-		println(`-m cherry_mov/cherry_pic/bl`)
+		println(`-m mov/add-dir/bl`)
 	}
 	PatchRename(*dir, *mode)
 }
 
 func PatchRename(dir string, mode string) {
-
 	filepath.Walk(dir, func(path string, fileInfo os.FileInfo, err error) error {
 		if fileInfo == nil {
 			return err
@@ -33,25 +32,36 @@ func PatchRename(dir string, mode string) {
 		}
 		fileName := fileInfo.Name()
 		folder := filepath.Dir(path)
+		// println(folder)
 		switch mode {
-		case `cherry_mov`:
-			renameCherryMov(path, folder, fileName)
-		case `cherry_pic`:
-			renameCherryPic(path, folder, fileName)
-		case `bl`:
-			renameBL(path, folder, fileName)
+		case `mov`:
+			renameMov(path, folder, fileName)
+		case `add-dir`:
+			renameAddDir(path, folder, fileName)
+		case `mo`:
+			moveOut(path, folder, fileName)
+		default:
+			renamePic(path, folder, fileName)
 		}
 		return nil
 	})
 }
 
-func renameCherryPic(path, folder, fileName string) error {
+//子文件往外移一层
+func moveOut(path, folder, fileName string) error {
+	newFolder := filepath.Dir(folder)
+	newPath := newFolder + `\` + filepath.Base(folder) + "-" + fileName
+	println(newPath)
+	return os.Rename(path, newPath)
+}
+
+func renameAddDir(path, folder, fileName string) error {
 	newPath := folder + `\` + filepath.Base(folder) + "-" + fileName
 	//println(newPath)
 	return os.Rename(path, newPath)
 }
 
-func renameCherryMov(path, folder, fileName string) error {
+func renameMov(path, folder, fileName string) error {
 	ext := filepath.Ext(fileName)
 	if ext == ".jpg" {
 		os.Remove(path)
@@ -63,11 +73,16 @@ func renameCherryMov(path, folder, fileName string) error {
 	//os.Remove(folder)
 }
 
-func renameBL(path, folder, fileName string) error {
-	regs := []*regexp.Regexp{}
-	regs = append(regs, regexp.MustCompile(`No\.(.*)\[`))
-	regs = append(regs, regexp.MustCompile(`Vol\.(.*)\s`))
-	regs = append(regs, regexp.MustCompile(`N[oO]\.([^\s]+)`))
+func renamePic(path, folder, fileName string) error {
+	regs := []*regexp.Regexp{
+		regexp.MustCompile(`No\.(\d+)\[`),
+		regexp.MustCompile(`N[oO]\.([^\s]+)`),
+		regexp.MustCompile(`N0([^\s]+)`),
+		regexp.MustCompile(`Vol\.(\d*)\s`),
+		regexp.MustCompile(`VOL([^\s]+)`),
+		regexp.MustCompile(`(\d{4}[\.\-]\d{2}[\.\-]\d{2})`),
+	}
+
 	vol := ``
 	for _, reg := range regs {
 		prefix := reg.FindStringSubmatch(filepath.Base(folder))
